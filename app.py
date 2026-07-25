@@ -640,6 +640,13 @@ def logout():
 def admin_dashboard():
     if 'user' not in session or session.get('role') != 'admin':
         return redirect(url_for('login'))
+    
+    # 🔥 ADICIONE ESTAS 3 LINHAS PARA CARREGAR O MAINTENANCE
+    from pathlib import Path
+    DATA_FILE = Path('data.json')
+    app_data = load_data()  # usa a função que já existe no seu main.py
+    settings = app_data.get("settings", {"maintenance": False, "maintenance_msg": "System under maintenance."})
+    
     users = load_users()
     user_list = []
     total_servers = 0
@@ -655,7 +662,13 @@ def admin_dashboard():
             'username': uname, 'password': data.get('password', ''),
             'servers': servers, 'server_count': len(servers), 'running_count': running
         })
-    return render_template('admin.html', users=user_list, total_servers=total_servers, total_running=total_running)
+    
+    # 🔥 ADICIONE settings=settings AQUI
+    return render_template('admin.html', 
+                           users=user_list, 
+                           total_servers=total_servers, 
+                           total_running=total_running,
+                           settings=settings)  # ← ESSENCIAL!
 
 
 @app.route('/admin/create_server', methods=['POST'])
