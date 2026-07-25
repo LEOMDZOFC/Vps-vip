@@ -129,8 +129,8 @@ threading.Thread(target=auto_restart_stopped_servers, daemon=True).start()
 DEFAULT_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%2300ff00'%3E%3Cpath d='M20 9V7c0-1.1-.9-2-2-2h-4c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-2h-2v2H6V5h4v2h8v2h2z'/%3E%3C/svg%3E"
 
 DEFAULT_CONFIG = {
-    "site_title": "SHAPPNO X VPS",
-    "site_header": "SHAPPNO VPS",
+    "site_title": "LEO MDZ VPS",
+    "site_header": "LEO MDZ VPS",
     "icon_url": DEFAULT_ICON,
     "theme": "matrix",
     "font_family": "default",
@@ -1273,7 +1273,7 @@ START_TIME = time.time()
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     welcome_text = (
-        "🤖 *SHAPPNO VPS Telegram Bot*\\n\\n"
+        "🤖 *LEO MDZ VPS Telegram Bot*\\n\\n"
         "Send API request like:\\n"
         "`/api https://api.github.com`\\n\\n"
         "*Commands:*\\n"
@@ -1326,7 +1326,7 @@ def send_info(message):
         f"• Python: {{platform.python_version()}}\\n"
         f"• Bot Status: Active\\n"
         f"• Time: {{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}}\\n"
-        f"• Host: SHAPPNO VPS (24/7 Uptime)"
+        f"• Host: LEO MDZ VPS (24/7 Uptime)"
     )
     bot.reply_to(message, info_text, parse_mode='Markdown')
 
@@ -1345,7 +1345,7 @@ def send_api_response(message):
     bot.send_chat_action(message.chat.id, 'typing')
 
     try:
-        r = requests.get(url, timeout=15, headers={{'User-Agent': 'SHAPPNO-TeleBot'}})
+        r = requests.get(url, timeout=15, headers={{'User-Agent': 'LEOMDZ-TeleBot'}})
         
         try:
             response_data = r.json()
@@ -1455,7 +1455,7 @@ if __name__ == "__main__":
     debug = os.environ.get("DEBUG", "False").lower() == "true"
     
     print("=" * 50)
-    print("SHAPPNO PREMIUM VPS - Starting...")
+    print("LEO MDZ PREMIUM VPS - Starting...")
     print("=" * 50)
     print(f"Port: {port}")
     print(f"Debug: {debug}")
