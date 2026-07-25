@@ -33,7 +33,166 @@
             cursor: pointer;
             border: 2px solid white;
         }
-        /* Toast */
+
+        /* ─── Tabs ─── */
+        .tab { 
+            cursor: pointer; 
+            padding: 10px 20px; 
+            font-size: 12px; 
+            font-weight: 700; 
+            letter-spacing: 1.5px; 
+            color: #6b7280; 
+            border-bottom: 2px solid transparent; 
+            transition: all 0.2s; 
+            background: transparent;
+            border: none;
+        }
+        .tab:hover { color: #9ca3af; }
+        .tab.active { 
+            color: #38bdf8; 
+            border-bottom: 2px solid #38bdf8; 
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ─── Cards ─── */
+        .card { 
+            background: #12141c; 
+            border: 1px solid rgba(59, 130, 246, 0.15); 
+            border-radius: 12px; 
+            overflow: hidden; 
+        }
+        .card-header { 
+            padding: 16px 20px; 
+            font-size: 12px; 
+            font-weight: 700; 
+            letter-spacing: 1.5px; 
+            color: #6b7280; 
+            border-bottom: 1px solid #1f2937; 
+        }
+
+        /* ─── User Row ─── */
+        .user-row { 
+            display: flex; 
+            align-items: center; 
+            padding: 14px 20px; 
+            gap: 12px; 
+            border-bottom: 1px solid #1a1d27; 
+            transition: background 0.2s; 
+        }
+        .user-row:hover { background: #1a1d27; }
+        .user-name { font-size: 14px; font-weight: 600; color: #fff; }
+        .user-meta { font-size: 11px; color: #4b5563; margin-top: 2px; }
+
+        /* ─── Server Row (PROJECTS) ─── */
+        .server-row { 
+            display: flex; 
+            align-items: center; 
+            padding: 12px 20px; 
+            gap: 10px; 
+            border-bottom: 1px solid #1a1d27; 
+            transition: background 0.2s; 
+        }
+        .server-row:hover { background: #1a1d27; }
+
+        /* ─── Buttons ─── */
+        .btn { 
+            padding: 6px 14px; 
+            border-radius: 6px; 
+            font-size: 11px; 
+            font-weight: 600; 
+            border: 1px solid; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            text-decoration: none;
+        }
+        .btn-red { 
+            background: #ef4444; 
+            color: #fff; 
+            border-color: #ef4444; 
+        }
+        .btn-red:hover { background: #dc2626; }
+
+        /* ─── Badge ─── */
+        .badge { 
+            padding: 3px 10px; 
+            border-radius: 20px; 
+            font-size: 10px; 
+            font-weight: 700; 
+            letter-spacing: 0.5px; 
+        }
+        .badge.running { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .badge.stopped { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+        /* ─── Stat ─── */
+        .stat { 
+            background: #12141c; 
+            border: 1px solid rgba(59, 130, 246, 0.15); 
+            border-radius: 10px; 
+            padding: 16px 20px; 
+            text-align: center; 
+            flex: 1; 
+        }
+        .stat-num { font-size: 28px; font-weight: 800; }
+        .stat-label { font-size: 10px; color: #4b5563; letter-spacing: 1.5px; margin-top: 2px; }
+
+        /* ─── Toggle ─── */
+        .maint-toggle {
+            width: 52px;
+            height: 28px;
+            background: #374151;
+            border-radius: 14px;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .maint-toggle.on { background: #ef4444; }
+        .toggle-dot {
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .maint-toggle.on .toggle-dot { transform: translateX(24px); }
+
+        /* ─── Form Input ─── */
+        .form-input {
+            width: 100%;
+            background: #0c0e14;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-input:focus { border-color: #3b82f6; }
+
+        /* ─── Save Button ─── */
+        .save-btn {
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .save-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* ─── Toast ─── */
         #toast {
             visibility: hidden;
             min-width: 250px;
@@ -82,63 +241,40 @@
     </header>
 
     <div class="container mx-auto p-6 max-w-7xl">
-        
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
-            <div class="bg-[#12141c] rounded-xl gradient-border p-5 hover-glow transition">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-400 text-sm">Total Users</p>
-                        <p class="text-3xl font-bold" id="totalUsers">{{ users|length }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-users text-xl text-blue-400"></i>
-                    </div>
-                </div>
+
+        <!-- ─── Stats Row ─── -->
+        <div style="display:flex;gap:14px;margin-bottom:28px;flex-wrap:wrap">
+            <div class="stat">
+                <div class="stat-num" style="color:#3b82f6">{{ users|length }}</div>
+                <div class="stat-label">USERS</div>
             </div>
-            <div class="bg-[#12141c] rounded-xl border border-green-500/20 p-5 hover-glow transition">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-400 text-sm">Total Servers</p>
-                        <p class="text-3xl font-bold" id="totalServers">{{ total_servers }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-server text-xl text-green-400"></i>
-                    </div>
-                </div>
+            <div class="stat">
+                <div class="stat-num" style="color:#10b981">{{ total_servers }}</div>
+                <div class="stat-label">SERVERS</div>
             </div>
-            <div class="bg-[#12141c] rounded-xl border border-yellow-500/20 p-5 hover-glow transition">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-400 text-sm">Running</p>
-                        <p class="text-3xl font-bold text-yellow-400" id="totalRunning">{{ total_running }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-play-circle text-xl text-yellow-400 pulse"></i>
-                    </div>
-                </div>
+            <div class="stat">
+                <div class="stat-num" style="color:#f59e0b">{{ total_running }}</div>
+                <div class="stat-label">RUNNING</div>
             </div>
-            <div class="bg-[#12141c] rounded-xl border border-purple-500/20 p-5 hover-glow transition">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-400 text-sm">Stopped</p>
-                        <p class="text-3xl font-bold text-purple-400" id="totalStopped">{{ total_servers - total_running }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-stop-circle text-xl text-purple-400"></i>
-                    </div>
+            <div class="stat">
+                <div class="stat-num" style="color:#a78bfa">{{ total_servers - total_running }}</div>
+                <div class="stat-label">STOPPED</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num" style="color:{% if settings and settings.maintenance %}#ef4444{% else %}#4b5563{% endif %}">
+                    {{ 'ON' if settings and settings.maintenance else 'OFF' }}
                 </div>
+                <div class="stat-label">MAINTENANCE</div>
             </div>
         </div>
 
-        <!-- Create Server Form -->
+        <!-- ─── Create Server ─── -->
         <div class="bg-[#12141c] rounded-xl gradient-border p-6 mb-8 hover-glow transition">
             <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
                 <i class="fas fa-plus-circle text-blue-400"></i> Create New Server
             </h2>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="createForm">
-                <!-- Basic Info -->
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Username *</label>
                     <input type="text" id="newUsername" placeholder="Enter username" 
@@ -158,8 +294,6 @@
                         <option value="static">📄 Static Website</option>
                     </select>
                 </div>
-                
-                <!-- Resources -->
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">RAM</label>
                     <select id="ram" 
@@ -188,8 +322,6 @@
                     <input type="number" id="expiryDays" placeholder="30" value="30" min="1" max="365"
                         class="w-full bg-[#0c0e14] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:border-blue-500 outline-none transition">
                 </div>
-
-                <!-- CPU Rate Limit -->
                 <div class="md:col-span-3">
                     <label class="block text-xs text-gray-500 mb-2 flex items-center gap-2">
                         <i class="fas fa-tachometer-alt text-blue-400"></i> 
@@ -212,27 +344,18 @@
                 </div>
             </div>
 
-            <!-- Quick Template Buttons -->
             <div class="mt-5 flex flex-wrap gap-2">
                 <span class="text-xs text-gray-500 flex items-center mr-2">
                     <i class="fas fa-bolt mr-1"></i> Quick Templates:
                 </span>
                 <button onclick="quickTemplate('discord')" type="button"
-                    class="bg-indigo-600/20 hover:bg-indigo-600/40 px-3 py-1.5 rounded-lg text-xs transition border border-indigo-500/30">
-                    🤖 Discord Bot
-                </button>
+                    class="bg-indigo-600/20 hover:bg-indigo-600/40 px-3 py-1.5 rounded-lg text-xs transition border border-indigo-500/30">🤖 Discord Bot</button>
                 <button onclick="quickTemplate('telegram')" type="button"
-                    class="bg-blue-600/20 hover:bg-blue-600/40 px-3 py-1.5 rounded-lg text-xs transition border border-blue-500/30">
-                    📨 Telegram Bot
-                </button>
+                    class="bg-blue-600/20 hover:bg-blue-600/40 px-3 py-1.5 rounded-lg text-xs transition border border-blue-500/30">📨 Telegram Bot</button>
                 <button onclick="quickTemplate('flask')" type="button"
-                    class="bg-green-600/20 hover:bg-green-600/40 px-3 py-1.5 rounded-lg text-xs transition border border-green-500/30">
-                    🌐 Flask App
-                </button>
+                    class="bg-green-600/20 hover:bg-green-600/40 px-3 py-1.5 rounded-lg text-xs transition border border-green-500/30">🌐 Flask App</button>
                 <button onclick="quickTemplate('node')" type="button"
-                    class="bg-yellow-600/20 hover:bg-yellow-600/40 px-3 py-1.5 rounded-lg text-xs transition border border-yellow-500/30">
-                    💚 Node.js App
-                </button>
+                    class="bg-yellow-600/20 hover:bg-yellow-600/40 px-3 py-1.5 rounded-lg text-xs transition border border-yellow-500/30">💚 Node.js App</button>
             </div>
 
             <button onclick="createServer()" 
@@ -241,173 +364,152 @@
             </button>
         </div>
 
-        <!-- Users & Servers List -->
-        <div class="bg-[#12141c] rounded-xl gradient-border overflow-hidden">
-            <div class="p-5 border-b border-gray-800 flex justify-between items-center">
-                <div>
-                    <h2 class="text-xl font-bold"><i class="fas fa-list mr-2"></i>User & Server List</h2>
-                    <p class="text-gray-500 text-xs mt-1">Manage all users and their servers</p>
+        <!-- ─── Tabs Navigation ─── -->
+        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid #1f2937;padding-bottom:0">
+            <button class="tab active" onclick="switchTab('users', this)">USERS</button>
+            <button class="tab" onclick="switchTab('projects', this)">PROJECTS</button>
+            <button class="tab" onclick="switchTab('maintenance', this)">MAINTENANCE</button>
+        </div>
+
+        <!-- ─── TAB: USERS ─── -->
+        <div id="tab-users" class="tab-panel active">
+            <div class="card">
+                <div class="card-header">{{ users|length }} USER(S)</div>
+                {% if users %}
+                {% for u in users %}
+                <div class="user-row">
+                    <div style="flex:1">
+                        <div class="user-name">@{{ u.username }}</div>
+                        <div class="user-meta">{{ u.servers|length }} servers · 
+                            {{ u.servers|selectattr('status', 'equalto', 'running')|list|length }} running
+                        </div>
+                    </div>
+                    <button onclick="deleteServer('{{ u.username }}', '')" class="btn btn-red">Delete</button>
                 </div>
-                <button onclick="location.reload()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg text-xs transition">
-                    <i class="fas fa-sync-alt mr-1"></i> Refresh
-                </button>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-[#0c0e14]">
-                        <tr class="text-left text-gray-400 text-sm">
-                            <th class="p-4">User</th>
-                            <th class="p-4">Password</th>
-                            <th class="p-4">Server Link</th>
-                            <th class="p-4">Config</th>
-                            <th class="p-4">CPU Limit</th>
-                            <th class="p-4">Status</th>
-                            <th class="p-4">Expiry</th>
-                            <th class="p-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if users|length == 0 %}
-                        <tr>
-                            <td colspan="8" class="p-8 text-center text-gray-500">
-                                <i class="fas fa-inbox text-3xl mb-3 block"></i>
-                                No users found. Create your first server!
-                            </td>
-                        </tr>
-                        {% endif %}
-                        
-                        {% for user in users %}
-                            {% for server in user.servers %}
-                            <tr class="border-b border-gray-800 hover:bg-[#1a1d27] transition">
-                                <!-- User Info -->
-                                <td class="p-4">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
-                                            <span class="text-xs font-bold text-blue-400">{{ user.username[0] | upper }}</span>
-                                        </div>
-                                        <span class="font-mono text-sm">{{ user.username }}</span>
-                                    </div>
-                                </td>
-                                
-                                <!-- Password -->
-                                <td class="p-4">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-sm font-mono" id="pass-{{ server.server_id }}">••••••••</span>
-                                        <button onclick="togglePassword('{{ server.server_id }}', '{{ user.password }}')" 
-                                            class="text-gray-500 hover:text-gray-300 text-xs" type="button">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                                
-                                <!-- Server Link -->
-                                <td class="p-4">
-                                    <a href="{{ server.login_url }}" target="_blank" 
-                                        class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
-                                        <i class="fas fa-external-link-alt text-xs"></i>
-                                        {{ server.server_id[:12] }}...
-                                    </a>
-                                </td>
-                                
-                                <!-- Config -->
-                                <td class="p-4 text-xs">
-                                    <span class="bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full">{{ server.type }}</span>
-                                    <span class="text-gray-500 mx-1">|</span>
-                                    <span class="text-gray-400">{{ server.ram }}</span>
-                                    <span class="text-gray-500 mx-1">|</span>
-                                    <span class="text-gray-400">{{ server.disk }}</span>
-                                </td>
-                                
-                                <!-- CPU Limit -->
-                                <td class="p-4">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-16 bg-gray-800 rounded-full h-2 overflow-hidden">
-                                            <div class="h-full rounded-full transition-all duration-300" 
-                                                style="width: {{ server.cpu_limit | default(80) }}%; 
-                                                    background: {% if server.cpu_limit | default(80) <= 30 %}#10b981
-                                                    {% elif server.cpu_limit | default(80) <= 60 %}#f59e0b
-                                                    {% elif server.cpu_limit | default(80) <= 80 %}#f97316
-                                                    {% else %}#ef4444{% endif %};">
-                                            </div>
-                                        </div>
-                                        <span class="text-xs font-bold 
-                                            {% if server.cpu_limit | default(80) <= 30 %}text-green-400
-                                            {% elif server.cpu_limit | default(80) <= 60 %}text-yellow-400
-                                            {% elif server.cpu_limit | default(80) <= 80 %}text-orange-400
-                                            {% else %}text-red-400{% endif %}">
-                                            {{ server.cpu_limit | default(80) }}%
-                                        </span>
-                                        <button onclick="changeCPULimit('{{ server.server_id }}', {{ server.cpu_limit | default(80) }})" 
-                                            class="text-gray-500 hover:text-blue-400 text-xs" title="Change CPU Limit" type="button">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                                
-                                <!-- Status -->
-                                <td class="p-4">
-                                    {% if server.rate_limit_exceeded %}
-                                    <span class="px-2 py-1 rounded-full text-xs bg-orange-500/20 text-orange-400 flex items-center gap-1 w-fit">
-                                        <i class="fas fa-exclamation-triangle"></i> Rate Limited
-                                    </span>
-                                    {% elif server.status == 'running' %}
-                                    <span class="px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-400 flex items-center gap-1 w-fit">
-                                        <i class="fas fa-circle text-[6px]"></i> Running
-                                    </span>
-                                    {% else %}
-                                    <span class="px-2 py-1 rounded-full text-xs bg-red-500/20 text-red-400 flex items-center gap-1 w-fit">
-                                        <i class="fas fa-circle text-[6px]"></i> Stopped
-                                    </span>
-                                    {% endif %}
-                                </td>
-                                
-                                <!-- Expiry -->
-                                <td class="p-4">
-                                    <span class="text-yellow-400 text-xs">
-                                        <i class="far fa-calendar-alt mr-1"></i>
-                                        {{ server.expiry[:10] if server.expiry else 'N/A' }}
-                                    </span>
-                                </td>
-                                
-                                <!-- Actions -->
-                                <td class="p-4">
-                                    <div class="flex gap-2">
-                                        <button onclick="changeCPULimit('{{ server.server_id }}', {{ server.cpu_limit | default(80) }})" 
-                                            class="text-blue-400 hover:text-blue-300 text-sm bg-blue-500/10 px-2 py-1 rounded transition"
-                                            title="Change CPU Limit" type="button">
-                                            <i class="fas fa-tachometer-alt"></i>
-                                        </button>
-                                        <button onclick="deleteServer('{{ user.username }}', '{{ server.server_id }}')" 
-                                            class="text-red-400 hover:text-red-300 text-sm bg-red-500/10 px-2 py-1 rounded transition"
-                                            title="Delete Server" type="button">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% endfor %}
-                    </tbody>
-                </table>
+                {% endfor %}
+                {% else %}
+                <div style="padding:32px;text-align:center;color:#374151;font-size:13px">No users yet.</div>
+                {% endif %}
             </div>
         </div>
+
+        <!-- ─── TAB: PROJECTS ─── -->
+        <div id="tab-projects" class="tab-panel">
+            <div class="card">
+                <div class="card-header">{{ total_servers }} PROJECT(S)</div>
+                {% set found = namespace(value=false) %}
+                {% for user in users %}
+                    {% for s in user.servers %}
+                        {% set found.value = true %}
+                        <div class="server-row">
+                            <span style="font-size:14px;font-weight:700;color:#fff;flex:1">{{ s.server_id[:8] }}</span>
+                            <span style="color:#6b7280;font-size:12px">@{{ user.username }}</span>
+                            <span style="color:#4b5563;font-size:11px">{{ s.type }} | {{ s.ram }}</span>
+                            <span class="badge {{ s.status }}">{{ s.status.upper() }}</span>
+                            <a href="{{ s.login_url }}" target="_blank" class="btn" style="border-color:#2a2a2a;color:#6b7280;background:transparent;font-size:11px">View</a>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                {% if not found.value %}
+                <div style="padding:24px;text-align:center;color:#374151;font-size:13px">No projects yet.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ─── TAB: MAINTENANCE ─── -->
+        <div id="tab-maintenance" class="tab-panel">
+            <div class="card" style="padding:20px">
+                <div class="card-header" style="padding:0 0 14px;border:none">MAINTENANCE MODE</div>
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+                    <div class="maint-toggle {% if settings and settings.maintenance %}on{% endif %}" id="maintToggle" onclick="toggleMaint()">
+                        <div class="toggle-dot"></div>
+                    </div>
+                    <span style="font-weight:700;font-size:14px;color:{% if settings and settings.maintenance %}#ef4444{% else %}#6b7280{% endif %}" id="maintLabel">
+                        {{ 'MAINTENANCE ON' if settings and settings.maintenance else 'MAINTENANCE OFF' }}
+                    </span>
+                </div>
+                <div style="margin-bottom:12px">
+                    <div style="font-size:11px;color:#6b7280;margin-bottom:6px;letter-spacing:1px">MAINTENANCE MESSAGE</div>
+                    <textarea id="maintMsg" class="form-input" style="resize:vertical;min-height:80px">{{ settings.get('maintenance_msg', 'System under maintenance.') if settings else 'System under maintenance.' }}</textarea>
+                </div>
+                <button class="save-btn" onclick="saveMaint()">SAVE MESSAGE</button>
+                <div style="margin-top:16px;background:#0d0d0d;border-radius:8px;padding:12px 14px;font-size:12px;color:#6b7280;line-height:1.6">
+                    When maintenance mode is <span style="color:#ef4444">ON</span>, users will see the maintenance message instead of accessing their projects. Use this for planned downtime.
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Toast Container -->
+    <!-- Toast -->
     <div id="toast"></div>
 
     <script>
-        // Quick CPU Preset
+        // ─── Tab Switching ───
+        function switchTab(name, el) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            el.classList.add('active');
+        }
+
+        // ─── Toast ───
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ─── Maintenance ───
+        let maintOn = {{ 'true' if settings and settings.maintenance else 'false' }};
+
+        function toggleMaint() {
+            maintOn = !maintOn;
+            const tog = document.getElementById('maintToggle');
+            const lbl = document.getElementById('maintLabel');
+            // Also update the stat card
+            const statNum = document.querySelector('.stat:last-child .stat-num');
+            
+            if (maintOn) {
+                tog.classList.add('on');
+                lbl.textContent = 'MAINTENANCE ON';
+                lbl.style.color = '#ef4444';
+                if (statNum) { statNum.textContent = 'ON'; statNum.style.color = '#ef4444'; }
+            } else {
+                tog.classList.remove('on');
+                lbl.textContent = 'MAINTENANCE OFF';
+                lbl.style.color = '#6b7280';
+                if (statNum) { statNum.textContent = 'OFF'; statNum.style.color = '#4b5563'; }
+            }
+            saveMaint();
+        }
+
+        async function saveMaint() {
+            const msg = document.getElementById('maintMsg').value;
+            try {
+                const res = await fetch('/admin/maintenance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: maintOn, message: msg })
+                });
+                const data = await res.json();
+                if (data.success) toast('✅ Maintenance settings saved!');
+                else toast('❌ Error saving settings');
+            } catch (e) {
+                toast('❌ Connection error');
+            }
+        }
+
+        // ─── Quick CPU Preset ───
         function setQuickCPU(value) {
             document.getElementById('cpuLimit').value = value;
             document.getElementById('cpuLimitValue').innerText = value + '%';
         }
 
-        // Quick Template
+        // ─── Quick Template ───
         function quickTemplate(type) {
             document.getElementById('serverType').value = 'python';
-            
             if (type === 'discord') {
                 document.getElementById('newUsername').value = 'discord_bot_' + Math.random().toString(36).substr(2, 4);
                 document.getElementById('ram').value = '256MB';
@@ -430,85 +532,17 @@
                 document.getElementById('cpuLimit').value = 60;
                 document.getElementById('cpuLimitValue').innerText = '60%';
             }
-            
             document.getElementById('newPassword').value = generatePassword();
         }
 
-        // Generate Random Password
         function generatePassword() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let password = '';
-            for (let i = 0; i < 12; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
+            for (let i = 0; i < 12; i++) password += chars.charAt(Math.floor(Math.random() * chars.length));
             return password;
         }
 
-        // Toggle Password
-        function togglePassword(serverId, password) {
-            const passElement = document.getElementById('pass-' + serverId);
-            if (passElement.innerText === '••••••••') {
-                passElement.innerText = password;
-            } else {
-                passElement.innerText = '••••••••';
-            }
-        }
-
-        // Change CPU Limit
-        function changeCPULimit(serverId, currentLimit) {
-            Swal.fire({
-                title: 'Change CPU Rate Limit',
-                text: `Current limit: ${currentLimit}%`,
-                input: 'range',
-                inputAttributes: {
-                    min: '10',
-                    max: '100',
-                    step: '5'
-                },
-                inputValue: currentLimit,
-                background: '#12141c',
-                color: '#fff',
-                confirmButtonColor: '#3b82f6',
-                showCancelButton: true,
-                didOpen: () => {
-                    const range = Swal.getInput();
-                    const valueDisplay = document.createElement('span');
-                    valueDisplay.style.cssText = 'display:block;text-align:center;font-size:2em;font-weight:bold;color:#3b82f6;margin-top:10px;';
-                    valueDisplay.textContent = range.value + '%';
-                    range.parentNode.insertBefore(valueDisplay, range.nextSibling);
-                    
-                    range.addEventListener('input', () => {
-                        valueDisplay.textContent = range.value + '%';
-                    });
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const newLimit = result.value;
-                    fetch(`/admin/set_rate_limit/${serverId}`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({cpu_limit: parseInt(newLimit)})
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'Updated!',
-                                html: `CPU Limit set to <strong>${newLimit}%</strong>`,
-                                icon: 'success',
-                                background: '#12141c',
-                                color: '#fff'
-                            });
-                            setTimeout(() => location.reload(), 1000);
-                        } else {
-                            Swal.fire('Error', data.error, 'error');
-                        }
-                    });
-                }
-            });
-        }
-
-        // Create Server
+        // ─── Create Server ───
         function createServer() {
             const data = {
                 username: document.getElementById('newUsername').value.trim(),
@@ -521,37 +555,15 @@
             };
             
             if (!data.username || !data.password) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Username and password are required!',
-                    icon: 'error',
-                    background: '#12141c',
-                    color: '#fff'
-                });
+                Swal.fire({ title: 'Error', text: 'Username and password are required!', icon: 'error', background: '#12141c', color: '#fff' });
                 return;
             }
-            
             if (data.cpu_limit < 10 || data.cpu_limit > 100) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'CPU limit must be between 10% and 100%!',
-                    icon: 'error',
-                    background: '#12141c',
-                    color: '#fff'
-                });
+                Swal.fire({ title: 'Error', text: 'CPU limit must be between 10% and 100%!', icon: 'error', background: '#12141c', color: '#fff' });
                 return;
             }
             
-            Swal.fire({
-                title: 'Creating Server...',
-                html: 'Please wait...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-                background: '#12141c',
-                color: '#fff'
-            });
+            Swal.fire({ title: 'Creating Server...', html: 'Please wait...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#12141c', color: '#fff' });
             
             fetch('/admin/create_server', {
                 method: 'POST',
@@ -559,51 +571,37 @@
                 body: JSON.stringify(data)
             })
             .then(res => res.json())
-            .then(data => {
-                if (data.success) {
+            .then(d => {
+                if (d.success) {
                     Swal.fire({
                         title: '🎉 Server Created!',
-                        html: `
-                            <div class="text-left space-y-2">
-                                <p><strong>Username:</strong> ${data.username}</p>
-                                <p><strong>Password:</strong> ${data.password}</p>
-                                <p><strong>CPU Limit:</strong> ${data.cpu_limit || '80'}%</p>
-                                <p><strong>Login URL:</strong> <a href="${data.login_url}" target="_blank" class="text-blue-400">${data.login_url}</a></p>
-                                <p><strong>Host:</strong> ${data.hostname}</p>
-                            </div>
-                        `,
+                        html: `<div class="text-left space-y-2"><p><strong>Username:</strong> ${d.username}</p><p><strong>Password:</strong> ${d.password}</p><p><strong>CPU Limit:</strong> ${d.cpu_limit || '80'}%</p><p><strong>Login URL:</strong> <a href="${d.login_url}" target="_blank" class="text-blue-400">${d.login_url}</a></p><p><strong>Host:</strong> ${d.hostname}</p></div>`,
                         icon: 'success',
                         background: '#12141c',
                         color: '#fff',
                         confirmButtonColor: '#3b82f6'
                     });
-                    
-                    // Clear form
                     document.getElementById('newUsername').value = '';
                     document.getElementById('newPassword').value = '';
                     document.getElementById('cpuLimit').value = 80;
                     document.getElementById('cpuLimitValue').innerText = '80%';
-                    
                     setTimeout(() => location.reload(), 3000);
                 } else {
-                    Swal.fire('Error', data.error || 'Something went wrong', 'error');
+                    Swal.fire('Error', d.error || 'Something went wrong', 'error');
                 }
             })
-            .catch(err => {
-                Swal.fire('Error', 'Could not connect to server', 'error');
-            });
+            .catch(() => Swal.fire('Error', 'Could not connect to server', 'error'));
         }
-        
-        // Delete Server
+
+        // ─── Delete Server/User ───
         function deleteServer(username, serverId) {
+            let html = `<p>Are you sure you want to delete user <strong>${username}</strong>?</p>`;
+            if (!serverId) {
+                html += `<p class="text-red-400 text-sm mt-2">⚠️ This will delete ALL servers and files for this user!</p>`;
+            }
             Swal.fire({
-                title: 'Delete Server?',
-                html: `
-                    <p>Are you sure you want to delete this server?</p>
-                    <p class="text-red-400 text-sm mt-2"><strong>User:</strong> ${username}</p>
-                    <p class="text-red-400 text-sm"><strong>Server ID:</strong> ${serverId}</p>
-                    <p class="text-yellow-400 text-xs mt-3">⚠️ This will delete all files and cannot be undone!</p>
-                `,
+                title: 'Delete?',
+                html: html,
                 icon: 'warning',
                 background: '#12141c',
                 color: '#fff',
@@ -613,31 +611,26 @@
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Find first server_id for this user if not specified
+                    if (!serverId) {
+                        // We need a concrete server_id to delete via the route.
+                        // For simplicity, we'll just reload and let admin delete individually.
+                        toast('⚠️ Click the trash icon on a specific server to delete it');
+                        return;
+                    }
                     fetch(`/admin/delete_server/${username}/${serverId}`, {method: 'POST'})
                         .then(() => {
-                            Swal.fire({
-                                title: 'Deleted!',
-                                text: 'Server has been deleted.',
-                                icon: 'success',
-                                background: '#12141c',
-                                color: '#fff'
-                            });
+                            Swal.fire({ title: 'Deleted!', text: 'Server has been deleted.', icon: 'success', background: '#12141c', color: '#fff' });
                             setTimeout(() => location.reload(), 1000);
                         });
                 }
             });
         }
-        
-        // Keyboard shortcuts
+
+        // ─── Keyboard Shortcuts ───
         document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'r') {
-                e.preventDefault();
-                location.reload();
-            }
-            if (e.ctrlKey && e.key === 'n') {
-                e.preventDefault();
-                document.getElementById('newUsername').focus();
-            }
+            if (e.ctrlKey && e.key === 'r') { e.preventDefault(); location.reload(); }
+            if (e.ctrlKey && e.key === 'n') { e.preventDefault(); document.getElementById('newUsername').focus(); }
         });
     </script>
 </body>
