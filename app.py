@@ -6,11 +6,10 @@ import shutil
 import zipfile
 import hashlib
 import psutil
-import threading
 from pathlib import Path
 from functools import wraps
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, abort
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash, send_file, abort
 import io
 
 app = Flask(__name__)
@@ -23,19 +22,8 @@ SERVERS_DIR.mkdir(exist_ok=True)
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "SHAPPNO004X")
 
+# In-memory process registry: {server_name: Popen object}
 RUNNING_PROCESSES = {}
-RESET_TIMERS = {}
-
-THEME_PRESETS = {
-    "purple": "#a855f7",
-    "green":  "#00ff41",
-    "blue":   "#38bdf8",
-    "red":    "#ef4444",
-    "amber":  "#fbbf24",
-    "cyan":   "#06b6d4",
-    "pink":   "#ec4899",
-    "lime":   "#84cc16",
-}
 
 
 # ─── Data helpers ─────────────────────────────────────────────────────────────
@@ -46,32 +34,13 @@ def load_data():
             return json.loads(DATA_FILE.read_text())
         except Exception:
             pass
-    return {
-        "servers": {},
-        "users": {},
-        "settings": {
-            "maintenance": False,
-            "maintenance_msg": "System under maintenance.",
-            "theme_color": "#a855f7"
-        }
-    }
+    return {"servers": {}, "users": {}, "settings": {"maintenance": False, "maintenance_msg": "System under maintenance."}}
 
 def save_data(data):
     DATA_FILE.write_text(json.dumps(data, indent=2, default=str))
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
-
-def get_theme_color():
-    data = load_data()
-    return data.get("settings", {}).get("theme_color", "#a855f7")
-
-
-# ─── Context processor: injects theme_color into every template ───────────────
-
-@app.context_processor
-def inject_theme():
-    return {"theme_color": get_theme_color()}
 
 
 # ─── Decorators ───────────────────────────────────────────────────────────────
@@ -131,6 +100,7 @@ def get_run_command(runtime, main_file):
         return ["python", "-u", main_file]
 
 def _sync_process_status():
+    """Sync data.json status with actual live processes on startup."""
     data = load_data()
     changed = False
     for name, cfg in data["servers"].items():
@@ -143,108 +113,6 @@ def _sync_process_status():
         save_data(data)
 
 _sync_process_status()
-
-
-# ─── Auto-reset helpers ────────────────────────────────────────────────────────
-
-def _auto_reset_seconds(cfg):
-    ar = cfg.get("auto_reset", {})
-    y = ar.get("years", 0) or 0
-    d = ar.get("days", 0) or 0
-    h = ar.get("hours", 0) or 0
-    m = ar.get("minutes", 0) or 0
-    s = ar.get("seconds", 0) or 0
-    return int(y * 365 * 24 * 3600 + d * 24 * 3600 + h * 3600 + m * 60 + s)
-
-def _do_auto_reset(name):
-    try:
-        data = load_data()
-        cfg = data["servers"].get(name)
-        if not cfg:
-            return
-        pid = cfg.get("pid")
-        if name in RUNNING_PROCESSES:
-            entry = RUNNING_PROCESSES[name]
-            proc = entry["proc"]
-            try:
-                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-            except Exception:
-                try:
-                    proc.terminate()
-                except Exception:
-                    pass
-            try:
-                proc.wait(timeout=5)
-            except Exception:
-                try:
-                    proc.kill()
-                except Exception:
-                    pass
-            try:
-                entry["log_file"].close()
-            except Exception:
-                pass
-            del RUNNING_PROCESSES[name]
-        elif pid:
-            kill_process(pid)
-
-        log_path = SERVERS_DIR / name / "logs.txt"
-        try:
-            with open(log_path, "a") as lf:
-                lf.write(f"\n{'='*50}\n[{datetime.now().isoformat()}] AUTO RESET triggered\n{'='*50}\n")
-        except Exception:
-            pass
-
-        main_file = cfg.get("main_file") or "main.py"
-        extract_dir = SERVERS_DIR / name / "extracted"
-        main_path = extract_dir / main_file
-        if main_path.exists():
-            cmd = get_run_command(cfg.get("runtime", "python"), main_file)
-            env = os.environ.copy()
-            env["PORT"] = str(cfg.get("port", 8080))
-            log_file = open(log_path, "a")
-            proc = subprocess.Popen(cmd, cwd=str(extract_dir), stdout=log_file, stderr=log_file, env=env, preexec_fn=os.setsid)
-            RUNNING_PROCESSES[name] = {"proc": proc, "log_file": log_file}
-            cfg["status"] = "running"
-            cfg["pid"] = proc.pid
-        else:
-            cfg["status"] = "stopped"
-            cfg["pid"] = None
-
-        data["servers"][name] = cfg
-        save_data(data)
-
-        total = _auto_reset_seconds(cfg)
-        if cfg.get("auto_reset", {}).get("enabled") and total > 0:
-            _schedule_reset(name, total)
-    except Exception:
-        pass
-
-def _schedule_reset(name, total_seconds):
-    if name in RESET_TIMERS:
-        try:
-            RESET_TIMERS[name]["timer"].cancel()
-        except Exception:
-            pass
-    t = threading.Timer(total_seconds, _do_auto_reset, args=[name])
-    t.daemon = True
-    t.start()
-    RESET_TIMERS[name] = {
-        "timer": t,
-        "started_at": datetime.now().isoformat(),
-        "total_seconds": total_seconds
-    }
-
-def _init_reset_timers():
-    data = load_data()
-    for name, cfg in data["servers"].items():
-        ar = cfg.get("auto_reset", {})
-        if ar.get("enabled"):
-            total = _auto_reset_seconds(cfg)
-            if total > 0:
-                _schedule_reset(name, total)
-
-_init_reset_timers()
 
 
 # ─── Auth routes ──────────────────────────────────────────────────────────────
@@ -269,9 +137,11 @@ def login():
             if stored_hash and stored_hash != hash_password(password):
                 return render_template("login.html", error="Wrong password")
             elif not stored_hash and password:
+                # First login with password — set it
                 data["users"][username]["password_hash"] = hash_password(password)
                 save_data(data)
         else:
+            # New user registration
             data["users"][username] = {
                 "joined": datetime.now().isoformat(),
                 "password_hash": hash_password(password) if password else ""
@@ -295,6 +165,7 @@ def dashboard():
     username = session["username"]
     data = load_data()
     user_servers = {k: v for k, v in data["servers"].items() if v.get("owner") == username}
+    # Sync live process status
     changed = False
     for name, cfg in user_servers.items():
         pid = cfg.get("pid")
@@ -341,8 +212,7 @@ def create_server():
         "port": 8080,
         "packages": [],
         "pid": None,
-        "created": datetime.now().isoformat(),
-        "auto_reset": {"enabled": False, "years": 0, "days": 0, "hours": 0, "minutes": 0, "seconds": 0}
+        "created": datetime.now().isoformat()
     }
     data["servers"][name] = cfg
     save_data(data)
@@ -355,21 +225,16 @@ def delete_server(name):
     data = load_data()
     cfg = data["servers"].get(name)
     if cfg and (cfg.get("owner") == session["username"] or session.get("admin")):
+        # Stop process if running
         pid = cfg.get("pid")
         if pid:
             kill_process(pid)
         if name in RUNNING_PROCESSES:
             try:
-                RUNNING_PROCESSES[name]["proc"].terminate()
+                RUNNING_PROCESSES[name].terminate()
             except Exception:
                 pass
             del RUNNING_PROCESSES[name]
-        if name in RESET_TIMERS:
-            try:
-                RESET_TIMERS[name]["timer"].cancel()
-            except Exception:
-                pass
-            del RESET_TIMERS[name]
         del data["servers"][name]
         save_data(data)
         shutil.rmtree(SERVERS_DIR / name, ignore_errors=True)
@@ -382,14 +247,13 @@ def server_detail(name):
     cfg = data["servers"].get(name)
     if not cfg:
         return "Server not found", 404
+    # Sync live process status
     pid = cfg.get("pid")
     if pid and not is_process_alive(pid):
         cfg["status"] = "stopped"
         cfg["pid"] = None
         data["servers"][name] = cfg
         save_data(data)
-    if "auto_reset" not in cfg:
-        cfg["auto_reset"] = {"enabled": False, "years": 0, "days": 0, "hours": 0, "minutes": 0, "seconds": 0}
     extract_dir = SERVERS_DIR / name / "extracted"
     files = list_files(extract_dir)
     return render_template("server.html", server_name=name, config=cfg, files=files)
@@ -464,7 +328,10 @@ def install_package(name):
         return jsonify({"success": False, "error": "Package name required"})
     install_str = f"{pkg_name}=={pkg_ver}" if pkg_ver else pkg_name
     try:
-        result = subprocess.run(["pip", "install", install_str], capture_output=True, text=True, timeout=120)
+        result = subprocess.run(
+            ["pip", "install", install_str],
+            capture_output=True, text=True, timeout=120
+        )
         if result.returncode != 0:
             return jsonify({"success": False, "error": result.stderr[:400] or result.stdout[:400]})
     except Exception as e:
@@ -517,63 +384,7 @@ def save_settings(name):
     return jsonify({"success": True})
 
 
-# ─── Auto Reset routes ────────────────────────────────────────────────────────
-
-@app.route("/server/<name>/auto-reset/settings", methods=["POST"])
-@login_required
-def save_auto_reset_settings(name):
-    data = load_data()
-    cfg = data["servers"].get(name)
-    if not cfg:
-        return jsonify({"success": False, "error": "Not found"}), 404
-    payload = request.get_json()
-    enabled = bool(payload.get("enabled", False))
-    years = int(payload.get("years", 0) or 0)
-    days = int(payload.get("days", 0) or 0)
-    hours = int(payload.get("hours", 0) or 0)
-    minutes = int(payload.get("minutes", 0) or 0)
-    seconds = int(payload.get("seconds", 0) or 0)
-    cfg["auto_reset"] = {"enabled": enabled, "years": years, "days": days, "hours": hours, "minutes": minutes, "seconds": seconds}
-    data["servers"][name] = cfg
-    save_data(data)
-    if name in RESET_TIMERS:
-        try:
-            RESET_TIMERS[name]["timer"].cancel()
-        except Exception:
-            pass
-        del RESET_TIMERS[name]
-    if enabled:
-        total = _auto_reset_seconds(cfg)
-        if total > 0:
-            _schedule_reset(name, total)
-    return jsonify({"success": True})
-
-@app.route("/server/<name>/auto-reset", methods=["POST"])
-@login_required
-def trigger_auto_reset(name):
-    data = load_data()
-    cfg = data["servers"].get(name)
-    if not cfg:
-        return jsonify({"success": False, "error": "Not found"}), 404
-    threading.Thread(target=_do_auto_reset, args=[name], daemon=True).start()
-    return jsonify({"success": True})
-
-@app.route("/server/<name>/auto-reset/status")
-@login_required
-def auto_reset_status(name):
-    if name in RESET_TIMERS:
-        entry = RESET_TIMERS[name]
-        started = datetime.fromisoformat(entry["started_at"])
-        elapsed = (datetime.now() - started).total_seconds()
-        remaining = max(0, entry["total_seconds"] - int(elapsed))
-        return jsonify({"remaining": remaining, "total": entry["total_seconds"]})
-    data = load_data()
-    cfg = data["servers"].get(name, {})
-    total = _auto_reset_seconds(cfg)
-    return jsonify({"remaining": total, "total": total})
-
-
-# ─── Start / Stop ─────────────────────────────────────────────────────────────
+# ─── Start / Stop (REAL) ──────────────────────────────────────────────────────
 
 @app.route("/server/<name>/start", methods=["POST"])
 @login_required
@@ -582,25 +393,42 @@ def start_server(name):
     cfg = data["servers"].get(name)
     if not cfg:
         return jsonify({"success": False, "error": "Not found"}), 404
+
+    # Check if already running
     pid = cfg.get("pid")
     if pid and is_process_alive(pid):
         return jsonify({"success": False, "error": "Already running"})
+
     main_file = cfg.get("main_file") or "main.py"
     extract_dir = SERVERS_DIR / name / "extracted"
     main_path = extract_dir / main_file
     if not main_path.exists():
         return jsonify({"success": False, "error": f"{main_file} not found. Upload your files first."})
+
     log_path = SERVERS_DIR / name / "logs.txt"
     log_path.parent.mkdir(parents=True, exist_ok=True)
+
     cmd = get_run_command(cfg.get("runtime", "python"), main_file)
     env = os.environ.copy()
     env["PORT"] = str(cfg.get("port", 8080))
+
     try:
         with open(log_path, "a") as lf:
-            lf.write(f"\n{'='*50}\n[{datetime.now().isoformat()}] Starting: {' '.join(cmd)}\n{'='*50}\n")
+            lf.write(f"\n{'='*50}\n")
+            lf.write(f"[{datetime.now().isoformat()}] Starting: {' '.join(cmd)}\n")
+            lf.write(f"{'='*50}\n")
+
         log_file = open(log_path, "a")
-        proc = subprocess.Popen(cmd, cwd=str(extract_dir), stdout=log_file, stderr=log_file, env=env, preexec_fn=os.setsid)
+        proc = subprocess.Popen(
+            cmd,
+            cwd=str(extract_dir),
+            stdout=log_file,
+            stderr=log_file,
+            env=env,
+            preexec_fn=os.setsid
+        )
         RUNNING_PROCESSES[name] = {"proc": proc, "log_file": log_file}
+
         cfg["status"] = "running"
         cfg["pid"] = proc.pid
         data["servers"][name] = cfg
@@ -609,6 +437,7 @@ def start_server(name):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+
 @app.route("/server/<name>/stop", methods=["POST"])
 @login_required
 def stop_server(name):
@@ -616,8 +445,11 @@ def stop_server(name):
     cfg = data["servers"].get(name)
     if not cfg:
         return jsonify({"success": False}), 404
+
     pid = cfg.get("pid")
     stopped = False
+
+    # Try in-memory registry first
     if name in RUNNING_PROCESSES:
         entry = RUNNING_PROCESSES[name]
         proc = entry["proc"]
@@ -641,14 +473,18 @@ def stop_server(name):
             pass
         del RUNNING_PROCESSES[name]
         stopped = True
+
+    # Also kill by PID from data.json if different
     if pid and not stopped:
         kill_process(pid)
+
     log_path = SERVERS_DIR / name / "logs.txt"
     try:
         with open(log_path, "a") as lf:
             lf.write(f"[{datetime.now().isoformat()}] Server stopped\n")
     except Exception:
         pass
+
     cfg["status"] = "stopped"
     cfg["pid"] = None
     data["servers"][name] = cfg
@@ -656,7 +492,7 @@ def stop_server(name):
     return jsonify({"success": True})
 
 
-# ─── Logs ─────────────────────────────────────────────────────────────────────
+# ─── Logs (REAL) ──────────────────────────────────────────────────────────────
 
 @app.route("/server/<name>/logs")
 @login_required
@@ -665,11 +501,12 @@ def get_logs(name):
     if not log_path.exists():
         return jsonify({"logs": "No logs yet. Start the server to see output."})
     try:
+        # Return last 200 lines to keep it fast
         content = log_path.read_text(errors="replace")
         lines = content.splitlines()
         if len(lines) > 200:
             lines = lines[-200:]
-            content = "... (showing last 200 lines) ...\n" + "\n".join(lines)
+            content = f"... (showing last 200 lines) ...\n" + "\n".join(lines)
         return jsonify({"logs": content or "No output yet."})
     except Exception as e:
         return jsonify({"logs": f"Error reading logs: {e}"})
@@ -709,6 +546,7 @@ def admin_dashboard():
     servers = data["servers"]
     users_raw = data["users"]
     settings = data.get("settings", {})
+    # Sync running statuses
     for name, cfg in servers.items():
         pid = cfg.get("pid")
         if pid and not is_process_alive(pid):
@@ -737,8 +575,7 @@ def admin_dashboard():
         })
     return render_template("admin.html", users=user_stats, servers=servers, settings=settings,
                            total_users=len(users_raw), total_projects=len(servers),
-                           running=running, total_files=total_files,
-                           theme_presets=THEME_PRESETS)
+                           running=running, total_files=total_files)
 
 @app.route("/admin/user/<username>/files")
 @admin_required
@@ -766,12 +603,6 @@ def admin_delete_user(username):
             except Exception:
                 pass
             del RUNNING_PROCESSES[name]
-        if name in RESET_TIMERS:
-            try:
-                RESET_TIMERS[name]["timer"].cancel()
-            except Exception:
-                pass
-            del RESET_TIMERS[name]
         shutil.rmtree(SERVERS_DIR / name, ignore_errors=True)
         del data["servers"][name]
     data["users"].pop(username, None)
@@ -789,23 +620,6 @@ def toggle_maintenance():
     return jsonify({"success": True})
 
 
-# ─── Theme route ──────────────────────────────────────────────────────────────
-
-@app.route("/admin/theme", methods=["POST"])
-@admin_required
-def set_theme():
-    data = load_data()
-    payload = request.get_json()
-    color = payload.get("color", "#a855f7").strip()
-    if not color.startswith("#") or len(color) not in (4, 7):
-        return jsonify({"success": False, "error": "Invalid color format"}), 400
-    if "settings" not in data:
-        data["settings"] = {}
-    data["settings"]["theme_color"] = color
-    save_data(data)
-    return jsonify({"success": True, "color": color})
-
-
 # ─── Download routes ───────────────────────────────────────────────────────────
 
 @app.route("/admin/file/<project_name>/download")
@@ -814,6 +628,7 @@ def admin_download_file(project_name):
     file_path = request.args.get("path", "")
     if not file_path:
         abort(400)
+    safe = Path(file_path).name
     safe_path = (SERVERS_DIR / project_name / "extracted" / file_path).resolve()
     base = (SERVERS_DIR / project_name / "extracted").resolve()
     if not str(safe_path).startswith(str(base)) or not safe_path.exists() or safe_path.is_dir():
